@@ -12,7 +12,7 @@ import jinja2
 import pdfkit
 import platform
 import io
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.schemas import ManualSchema
 
@@ -22,13 +22,23 @@ from rest_framework.response import Response
 from rest_framework import views
 from rest_framework.authtoken.models import Token
 
+from account.account_status import AccountStatus
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at the CV generator.")
 
+class IsVerified(BasePermission):
+    """
+    Permission check for verification.
+    """
+
+    def has_permission(self, request, view):
+        return request.user.status == AccountStatus.VERIFIED.value
 
 class GenerateView(views.APIView):
     serializer_class = CVSerializer
+    permission_classes = [IsVerified]
 
     @swagger_auto_schema(
         request_body=CVSerializer,
@@ -88,6 +98,8 @@ class GenerateView(views.APIView):
 
 
 class DataView(views.APIView):
+    permission_classes = [IsVerified]
+
     @swagger_auto_schema(
         operation_description="Returns current user's CV data in json format",
         responses={
@@ -105,6 +117,8 @@ class DataView(views.APIView):
 
 
 class PictureView(views.APIView):
+    permission_classes = [IsVerified]
+
     @swagger_auto_schema(
         operation_description="Posts picture to be used in user's CV. Parameter 'cv_id' should not be posted here",
 

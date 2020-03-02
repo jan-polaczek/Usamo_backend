@@ -9,6 +9,7 @@ media/
 
 # virtualenvs
 usamodzielnieni/
+venv/
 
 # cv pdfs and htmls
 *.pdf
