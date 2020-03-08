@@ -11,6 +11,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from account.permissions import IsVerified
 
 from .models import JobOffer
 from .serializers import JobOfferSerializer, JobOfferEditSerializer, JobOfferFiltersSerializer, InterestedUserSerializer
@@ -21,21 +22,9 @@ class OffersPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-
-from rest_framework.permissions import BasePermission
-
-from account.account_status import AccountStatus
-
-class IsVerified(BasePermission):
-    """
-    Permission check for verification.
-    """
-
-    def has_permission(self, request, view):
-        return request.user.status == AccountStatus.VERIFIED.value
-
 # Create your views here.
 class JobOfferCreateView(views.APIView):
+    permission_classes = [IsVerified]
 
     @swagger_auto_schema(
         query_serializer=JobOfferSerializer,
@@ -47,7 +36,6 @@ class JobOfferCreateView(views.APIView):
         },
         operation_description="Create job offer.",
     )
-    @permission_classes([IsAuthenticated])
     def post(self, request):
         try:
             employer = EmployerAccount.objects.get(user_id=request.user.id)
@@ -64,6 +52,7 @@ class JobOfferCreateView(views.APIView):
 
 
 class JobOfferView(views.APIView):
+    permission_classes = [IsVerified]
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -77,7 +66,6 @@ class JobOfferView(views.APIView):
         },
         operation_description="Edit job offer.",
     )
-    @permission_classes([IsAuthenticated])
     def post(self, request, offer_id):
         serializer = JobOfferEditSerializer(data=request.data)
         if serializer.is_valid():
@@ -106,7 +94,6 @@ class JobOfferView(views.APIView):
         },
         operation_description="Get job offer by id",
     )
-    @permission_classes([IsAuthenticated])
     def get(self, request, offer_id):
         try:
             offer = JobOffer.objects.get(pk=offer_id)
@@ -126,7 +113,6 @@ class JobOfferView(views.APIView):
         },
         operation_description="Set offer status to removed",
     )
-    @permission_classes([IsAuthenticated])
     def delete(self, request, offer_id):
         try:
             instance = JobOffer.objects.get(pk=offer_id)
@@ -150,6 +136,7 @@ class JobOfferView(views.APIView):
     operation_description="Returns offers list with filters"
 ))
 class JobOfferListView(generics.ListAPIView):
+    permission_classes = [IsVerified]
     serializer_class = JobOfferSerializer
     pagination_class = OffersPagination
 
@@ -164,6 +151,7 @@ class JobOfferListView(generics.ListAPIView):
 
 
 class JobOfferInterestedUsersView(views.APIView):
+    permission_classes = [IsVerified]
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -177,7 +165,6 @@ class JobOfferInterestedUsersView(views.APIView):
         },
         operation_description="Create or update database object for CV generation.",
     )
-    @permission_classes([IsAuthenticated])
     def post(self, request, offer_id):
         try:
             user = DefaultAccount.objects.get(user_id=request.user.id)
@@ -203,7 +190,6 @@ class JobOfferInterestedUsersView(views.APIView):
         },
         operation_description="Create or update database object for CV generation.",
     )
-    @permission_classes([IsAuthenticated])
     def get(self, request, offer_id):
         try:
             instance = JobOffer.objects.get(pk=offer_id)
@@ -228,7 +214,7 @@ class JobOfferInterestedUsersView(views.APIView):
     operation_description="Returns offers list with filters for current employer"
 ))
 class EmployerJobOffersView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsVerified]
     serializer_class = JobOfferSerializer
     pagination_class = OffersPagination
 

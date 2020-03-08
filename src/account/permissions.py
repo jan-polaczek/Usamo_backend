@@ -1,6 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 from account.account_type import AccountType
+from account.account_status import AccountStatus
 
 
 class IsEmployer(BasePermission):
@@ -17,6 +18,11 @@ class IsDefaultUser(BasePermission):
     Allows access only to default users.
     """
 
+class IsVerified(BasePermission):
+    """
+    Permission check for verification.
+    """
+
     def has_permission(self, request, view):
-        out = bool(request.user and request.user.type == AccountType.STANDARD.value)
-        return out
+        user = request.user
+        return user and user.status == AccountStatus.VERIFIED.value

@@ -15,20 +15,13 @@ from rest_framework import status, generics, parsers, renderers
 from rest_framework.response import Response
 from rest_framework import views
 from rest_framework.authtoken.models import Token
+from account.permissions import IsVerified
 
 from account.account_status import AccountStatus
 
 
 def index(request):
     return HttpResponse("Hello, world. You're at the CV generator.")
-
-class IsVerified(BasePermission):
-    """
-    Permission check for verification.
-    """
-
-    def has_permission(self, request, view):
-        return request.user.status == AccountStatus.VERIFIED.value
 
 class GenerateView(views.APIView):
     serializer_class = CVSerializer
