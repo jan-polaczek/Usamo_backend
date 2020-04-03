@@ -7,6 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from usamo import settings
 from account.models import DefaultAccount
 from account.account_type import AccountType
@@ -23,6 +24,12 @@ from job.views import sample_message_response
 
 def index(request):
     return HttpResponse("Hello, world. You're at the CV generator.")
+
+
+class CVPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class CVView(views.APIView):
@@ -233,6 +240,7 @@ class CVPictureView(views.APIView):
 class AdminUnverifiedCVList(generics.ListAPIView):
     serializer_class = CVDataSerializer
     permission_classes = [IsAdminUser]
+    pagination_class = CVPagination
 
     def get_queryset(self):
         return CV.objects.filter(wants_verification=True, is_verified=False)
@@ -314,6 +322,7 @@ class AdminCVListView(generics.ListAPIView):
     queryset = CV.objects.all()
     serializer_class = CVDataSerializer
     permission_classes = [IsAdminUser]
+    pagination_class = CVPagination
 
 
 @method_decorator(name='get', decorator=swagger_auto_schema(
@@ -326,6 +335,7 @@ class AdminCVListView(generics.ListAPIView):
 class UserCVListView(generics.ListAPIView):
     serializer_class = CVDataSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CVPagination
 
     def get_queryset(self):
         user = self.request.user

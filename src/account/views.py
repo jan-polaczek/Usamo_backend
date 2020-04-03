@@ -8,6 +8,7 @@ from rest_framework import views
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import permission_classes, api_view, renderer_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -19,6 +20,11 @@ from .account_status import AccountStatus
 from .serializers import *
 from .models import *
 from .filters import *
+
+class AccountsPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class AbstractRegistrationView(views.APIView):
@@ -266,6 +272,7 @@ class AdminAllAccountsListView(ListAPIView):
     serializer_class = AccountListSerializer
     permission_classes = [IsAdminUser]
     filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = AccountsPagination
     filterset_class = UserListFilter
 
 
@@ -280,6 +287,7 @@ class AdminDefaultAccountsListView(ListAPIView):
     serializer_class = AccountListSerializer
     permission_classes = [IsAdminUser]
     filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = AccountsPagination
     filterset_class = DefaultAccountListFilter
 
     def get_queryset(self):
@@ -297,6 +305,7 @@ class AdminEmployerListView(ListAPIView):
     serializer_class = AccountListSerializer
     permission_classes = [IsAdminUser]
     filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = AccountsPagination
     filterset_class = EmployerListFilter
 
     def get_queryset(self):
@@ -314,6 +323,7 @@ class AdminStaffListView(ListAPIView):
     serializer_class = AccountListSerializer
     permission_classes = [IsAdminUser]
     filter_backends = (filters.DjangoFilterBackend,)
+    pagination_class = AccountsPagination
     filterset_class = StaffListFilter
 
     def get_queryset(self):
