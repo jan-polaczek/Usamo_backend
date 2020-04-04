@@ -5,11 +5,18 @@ from drf_yasg.openapi import Schema, Parameter, IN_PATH
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 from rest_framework import views, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .permissions import *
 from .serializers import *
+
+
+class BlogPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class ErrorResponse(Response):
@@ -189,6 +196,7 @@ class BlogPostTagListView(generics.ListAPIView):
 class BlogPostListView(generics.ListAPIView):
     serializer_class = BlogPostSerializer
     permission_classes = [AllowAny]
+
 
     def get_queryset(self):
         queryset = BlogPost.objects.all()
