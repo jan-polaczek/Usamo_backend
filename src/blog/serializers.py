@@ -82,11 +82,12 @@ class BlogPostSerializer(serializers.ModelSerializer):
     summary = serializers.CharField(required=False, read_only=True)
     header = serializers.SerializerMethodField()
     date_created = serializers.DateTimeField(read_only=True)
+    has_header = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = BlogPost
-        fields = ['id', 'category', 'tags', 'content', 'date_created', 'author', 'comments', 'summary', 'title', 'header']
-        read_only_fields = ['id', 'date_created', 'author', 'comments']
+        fields = ['id', 'category', 'tags', 'content', 'date_created', 'author', 'comments', 'summary', 'title', 'has_header', 'header']
+        read_only_fields = ['id', 'date_created', 'author', 'comments', 'has_header']
 
     def get_header(self, obj):
         header = BlogPostHeader.objects.filter(blog_post_id=obj.id).first()

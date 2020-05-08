@@ -94,6 +94,7 @@ def sample_blogpost_response():
             'tags': Schema(type='array', items=Schema(type='string', default=['Tag1', 'Tag2'])),
             'content': Schema(type='string', format='byte', default='base64-encoded-html-string'),
             'title': Schema(type='string', default='Title'),
+            'has_header': Schema(type='boolean', default=False),
             'header': Schema(type='string', default='header-url'),
             'date_created': Schema(type='string', default="2020-02-20"),
             'author': Schema(
@@ -190,6 +191,8 @@ class BlogPostHeaderView(views.APIView):
         serializer = BlogPostHeaderSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            blog_post.has_header = True
+            blog_post.save()
         else:
             return ErrorResponse(serializer.errors, status.HTTP_400_BAD_REQUEST)
         
@@ -206,11 +209,16 @@ class BlogPostHeaderView(views.APIView):
         }
     )
     def delete(self, request, id):
+        blog_post = BlogPost.objects.get(pk=id)
+        if not blog_post:
+            return ErrorResponse("Blog o podanym id nie istnieje", status.HTTP_404_NOT_FOUND)
         header = BlogPostHeader.objects.filter(blog_post_id=id)
         if not header:
             return ErrorResponse("Post o danym id nie ma nagłówka", status.HTTP_404_NOT_FOUND)
         header = BlogPostHeader.objects.get(blog_post_id=id)
         header.delete()
+        blog_post.has_header = False
+        blog_post.save()
         response_data = {"message": "Nagłówek został pomyślnie usunięty"}
         return Response(response_data, status.HTTP_200_OK)
 
