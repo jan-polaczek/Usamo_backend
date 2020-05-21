@@ -11,8 +11,8 @@ application = ProtocolTypeRouter({
         TokenAuthMiddleware(
             URLRouter(
                 [
-                    url(r"^chat/(?P<username>[\w.@+-]+)/$", ChatConsumer),
-                    url("notification/ws/connect", NotificationConsumer)
+                    # url(r"^chat/(?P<username>[\w.@+-]+)/$", ChatConsumer),
+                    url("notification/count/unread", NotificationConsumer)
                 ]
             )
         )
